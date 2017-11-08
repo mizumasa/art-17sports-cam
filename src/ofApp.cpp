@@ -22,6 +22,8 @@ void ofApp::setup() {
     grayImage.allocate(WEB_CAM_W,WEB_CAM_H);
 
     detect.setup();
+    perspective.setup();
+    b_DrawImage=true;
 }
 
 
@@ -29,10 +31,18 @@ void ofApp::update() {
     
 #ifdef _USE_LIVE_VIDEO
     vidGrabber.update();
+
     if (vidGrabber.isFrameNew()){
+        perspective.setPixels(vidGrabber.getPixels());
+        perspective.update();
+
         colorImg.setFromPixels(vidGrabber.getPixels());
         grayImage = colorImg;
-        detect.setPixels(grayImage.getPixels());
+        if(b_DrawImage){
+            detect.setPixels(grayImage.getPixels());
+        }else{
+            detect.setColorPixels(perspective.getPixels());
+        }
     }
 #else
     movie.update();
@@ -46,6 +56,7 @@ void ofApp::update() {
 void ofApp::draw() {
     ofSetColor(255);
     detect.draw();
+    perspective.draw();
 }
 
 void ofApp::keyPressed(int key) {
@@ -53,4 +64,17 @@ void ofApp::keyPressed(int key) {
     if(key == 'g') detect.bHideGui = !detect.bHideGui;
     if(key == 's') detect.saveParam();
     if(key == 'l') detect.loadParam();
+    if(key == 'c') perspective.toggleImage();
+    if(key == 'd') b_DrawImage = !b_DrawImage;
 }
+
+void ofApp::mouseDragged(int x, int y, int button){
+    perspective.mouseDragged(mouseX, mouseY, button);
+}
+void ofApp::mousePressed(int x, int y, int button){
+    perspective.mousePressed(mouseX, mouseY, button);
+}
+void ofApp::mouseReleased(int x, int y, int button){
+    perspective.mouseReleased(mouseX, mouseY, button);
+}
+

@@ -60,6 +60,10 @@ void ofDetection::valChanged(int &val){
 void ofDetection::setPixels(ofPixels _pixels){
     grayImage.setFromPixels(_pixels);
 }
+void ofDetection::setColorPixels(ofPixels _pixels){
+    colorImg.setFromPixels(_pixels);
+    grayImage = colorImg;
+}
 
 ofPixels ofDetection::getPixels(){
     return grayImage.getPixels();

@@ -6,6 +6,7 @@
 #include "ofxOpenCv.h"
 #include "ofxGUI.h"
 #include "ofDetection.h"
+#include "ofPerspective.h"
 
 
 
@@ -17,6 +18,11 @@ public:
     void draw();
     void keyPressed(int key);
     
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+
+    
 #ifdef _USE_LIVE_VIDEO
 		  ofVideoGrabber 		vidGrabber;
 #else
@@ -25,14 +31,7 @@ public:
     ofxCvColorImage         colorImg;
     ofxCvGrayscaleImage 	grayImage;
     ofDetection detect;
-    
+    ofPerspective perspective;
 
-    //Affine
-    ofImage srcImg, dstImg;
-    cv::Mat srcMat, dstMat;
-    cv::Point2f srcPt[3], dstPt[3];
-    bool isHolding;
-    cv::Point2f *heldPt;
-    //Affine
-
+    bool b_DrawImage;
 };

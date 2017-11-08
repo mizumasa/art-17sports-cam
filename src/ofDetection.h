@@ -22,6 +22,7 @@ class ofDetection{
 public:
     void setup();
     void setPixels(ofPixels _pixels);
+    void setColorPixels(ofPixels _pixels);
     ofPixels getPixels();
     void update();
     void draw();
@@ -41,6 +42,8 @@ private:
     float threshold;
     ofxCv::ContourFinder contourFinder;
     
+    ofxCvColorImage         colorImg;
+
     ofxCvGrayscaleImage 	grayImage;
     ofxCvGrayscaleImage 	grayImageThr;
     void areaChanged(int &val);
