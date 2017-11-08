@@ -24,4 +24,14 @@ public:
     ofxCvColorImage         colorImg;
     ofxCvGrayscaleImage 	grayImage;
     ofDetection detect;
+    
+
+    //Affine
+    ofImage srcImg, dstImg;
+    cv::Mat srcMat, dstMat;
+    cv::Point2f srcPt[3], dstPt[3];
+    bool isHolding;
+    cv::Point2f *heldPt;
+    //Affine
+
 };
