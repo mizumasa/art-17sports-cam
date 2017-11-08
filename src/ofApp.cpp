@@ -30,7 +30,7 @@ void ofApp::update() {
 #ifdef _USE_LIVE_VIDEO
     vidGrabber.update();
     if (vidGrabber.isFrameNew()){
-        colorImg.setFromPixels(vidGrabber.getPixels(), WEB_CAM_W,WEB_CAM_H);
+        colorImg.setFromPixels(vidGrabber.getPixels());
         grayImage = colorImg;
         detect.setPixels(grayImage.getPixels());
     }
