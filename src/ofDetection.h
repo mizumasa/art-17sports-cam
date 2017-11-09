@@ -26,7 +26,6 @@ public:
     ofPixels getPixels();
     void update();
     void draw();
-    void drawWaku();
     void toggleImage();
     void saveParam();
     void loadParam();
@@ -58,15 +57,22 @@ private:
     ofParameter<int>  detectSpeedMax;
     
     //検出エリアパラメータ 百分率
-    ofParameter<int>  detectAreaTop;
-    ofParameter<int>  detectAreaBottom;
-    ofParameter<int>  detectAreaTopR;
-    ofParameter<int>  detectAreaTopL;
-    ofParameter<int>  detectAreaBottomR;
-    ofParameter<int>  detectAreaBottomL;
+    /*
+     ofParameter<int>  detectAreaTop;
+     ofParameter<int>  detectAreaBottom;
+     ofParameter<int>  detectAreaTopR;
+     ofParameter<int>  detectAreaTopL;
+     ofParameter<int>  detectAreaBottomR;
+     ofParameter<int>  detectAreaBottomL;
     int areaTop,areaBottom,areaTopR,areaTopL,areaBottomR,areaBottomL;
+    */
     
     ofxPanel gui;
     int i_ShowMode;
     bool bClearLog;
+    
+    ofxCvColorImage rgb, hsv;
+    ofxCvGrayscaleImage r, g, b;
+    ofxCvGrayscaleImage h, s, v;
+    vector<float> histogramH, histogramS, histogramV;
 };

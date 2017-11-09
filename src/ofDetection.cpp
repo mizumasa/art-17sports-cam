@@ -15,13 +15,7 @@ void ofDetection::setup() {
     gui.add(histscale.set("histscale", 10,3,50));
     gui.add(detectSpeedMin.set("detectSpeedMin", 4,1,30));
     gui.add(detectSpeedMax.set("detectSpeedMax", 30,1,30));
-    gui.add(detectAreaTop.set("detectAreaTop", 20,0,256));
-    gui.add(detectAreaTopL.set("detectAreaTopL", 64,0,256));
-    gui.add(detectAreaTopR.set("detectAreaTopR", 192,0,256));
-    gui.add(detectAreaBottom.set("detectAreaBottom", 236,0,256));
-    gui.add(detectAreaBottomL.set("detectAreaBottomL", 32,0,256));
-    gui.add(detectAreaBottomR.set("detectAreaBottomR", 224,0,256));
-
+    
     contourFinder.setMinAreaRadius(radMin);
     contourFinder.setMaxAreaRadius(radMax);
     contourFinder.setThreshold(th);
@@ -34,12 +28,6 @@ void ofDetection::setup() {
     radMax.addListener(this, &ofDetection::valChanged);
     th.addListener(this, &ofDetection::valChanged);
     histscale.addListener(this, &ofDetection::valChanged);
-    detectAreaTop.addListener(this, &ofDetection::areaChanged);
-    detectAreaTopL.addListener(this, &ofDetection::areaChanged);
-    detectAreaTopR.addListener(this, &ofDetection::areaChanged);
-    detectAreaBottom.addListener(this, &ofDetection::areaChanged);
-    detectAreaBottomL.addListener(this, &ofDetection::areaChanged);
-    detectAreaBottomR.addListener(this, &ofDetection::areaChanged);
     
     //osc sender
     sender.setup(HOST, PORT);
@@ -74,27 +62,10 @@ void ofDetection::update() {
     grayImageThr = grayImage;
     grayImageThr.threshold(_th);
     contourFinder.findContours(grayImageThr);
+    
+    
 }
 
-void ofDetection::drawWaku(){
-    int w;
-    w = ofGetWidth();
-    int h;
-    h = ofGetHeight();
-    ofSetColor(255, 255, 0);
-    ofSetLineWidth(3);
-    areaTop= (h*detectAreaTop)>>8;
-    areaTopL= (w*detectAreaTopL)>> 8;
-    areaTopR= (w*detectAreaTopR)>> 8;
-    areaBottom= (h*detectAreaBottom)>>8;
-    areaBottomR= (w*detectAreaBottomR)>> 8;
-    areaBottomL= (w*detectAreaBottomL)>> 8;
-    
-    ofLine(  areaTopL, areaTop, areaTopR ,areaTop);
-    ofLine(  areaTopL, areaTop, areaBottomL ,areaBottom);
-    ofLine(  areaTopR, areaTop, areaBottomR ,areaBottom);
-    ofLine(  areaBottomL, areaBottom, areaBottomR ,areaBottom);
-}
 
 
 void ofDetection::draw() {
@@ -113,8 +84,75 @@ void ofDetection::draw() {
     }
 #endif
     contourFinder.draw();
-    if(!bHideGui) gui.draw();
-    drawWaku();
+    if(!bHideGui){
+        gui.draw();
+        ofPixels colorPixels;
+        colorPixels = colorImg.getPixels();
+        for(int i = 0; i < contourFinder.size(); i++) {
+            ofPoint center = toOf(contourFinder.getCenter(i));
+            cv::Rect rect = contourFinder.getBoundingRect(i);
+            ofPixels detPixels;
+            colorPixels.cropTo(detPixels,center.x - rect.width/2,center.y - rect.height/2,rect.width,rect.height);
+            ofPushMatrix();
+            ofTranslate(center.x - rect.width/2, center.y - rect.height/2);
+            
+            if(0){//raw color Image
+                ofImage detImage;
+                detImage.setFromPixels(detPixels);
+                ofSetColor(255, 255, 255);
+                detImage.draw(0, 0);
+            }
+            int width,height;
+            width = rect.width;
+            height = rect.height;
+            rgb.allocate(width, height);
+            hsv.allocate(width, height);
+            h.allocate(width, height);
+            s.allocate(width, height);
+            v.allocate(width, height);
+
+            rgb.setFromPixels(detPixels);
+            string msg ;
+            cvCvtColor(rgb.getCvImage(), hsv.getCvImage(), CV_BGR2HSV);
+            //h.setFromPixels(hsv.getPixels().getChannel(0));
+            //s.setFromPixels(hsv.getPixels().getChannel(1));
+            //v.setFromPixels(hsv.getPixels().getChannel(2));
+            //hsv.resize(1, 1);
+            //rgb.resize(1,1);
+            ofPixels hsvPixels;
+            hsvPixels = hsv.getPixels();
+            unsigned char * buf = hsvPixels.getData();
+            int aveH = 0;
+            int countH = 0;
+            for(int j = 0 ;j<width*height; j++){
+                if(int(buf[j*3+1]) > 128 and int(buf[j*3+2])> 128){
+                    aveH += int(buf[j*3]);
+                    countH++;
+                }
+            }
+            //ofPixels rgbPixels;
+            //rgbPixels = rgb.getPixels();
+            //cout << int(hsvPixels.getData()[0]) <<endl;
+            if(countH > 10){
+                msg = ofToString(float(aveH)/countH);
+            }
+            //string msg = ofToString(hsvPixels.getData()[0])+":"+ofToString(hsvPixels.getData()[1])+":"+ofToString(hsvPixels.getData()[2]);
+            //ofSetColor(int(rgbPixels.getData()[0]), int(rgbPixels.getData()[1]), int(rgbPixels.getData()[2]));
+            //ofDrawRectangle(0, 0, 20, 20);
+            //h.draw(0, 0);
+            
+            int label = contourFinder.getLabel(i);
+            //string msg = ofToString(label) + ":" + ofToString(tracker.getAge(label));
+            ofVec2f velocity = toOf(contourFinder.getVelocity(i));
+            //string msg = ofToString(velocity.x)+":"+ofToString(velocity.y);
+            ofScale(5, 5);
+            ofSetColor(0, 255, 0);
+            ofLine(0, 0, velocity.x, velocity.y);
+            ofDrawBitmapString(msg, 0, 0);
+            ofPopMatrix();
+        }
+
+    }
 }
 
 void ofDetection::toggleImage(){

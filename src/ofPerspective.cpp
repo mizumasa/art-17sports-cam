@@ -8,7 +8,7 @@ void ofPerspective::setup() {
     bHideGui = true;
     
 
-    b_DrawImage = false;
+    b_DrawImage = true;
     
     camDrawScaleW=1;
     camDrawScaleH=1;
@@ -35,14 +35,10 @@ void ofPerspective::setup() {
     dstPt[2] = Point2f(500, 400);
     dstPt[3] = Point2f(200, 500);
 
-    srcPt[0] = Point2f(00, 00);
-    srcPt[1] = Point2f(400, 00);
-    srcPt[2] = Point2f(400, 400);
-    srcPt[3] = Point2f(00, 400);
-    dstPt[0] = Point2f(00, 00);
-    dstPt[1] = Point2f(800, 00);
-    dstPt[2] = Point2f(800, 800);
-    dstPt[3] = Point2f(00, 800);
+    srcPt[0] = Point2f(400, 00);
+    srcPt[1] = Point2f(880, 00);
+    srcPt[2] = Point2f(1080, 600);
+    srcPt[3] = Point2f(200, 600);
     dstPt[0] = Point2f(0, 0);
     dstPt[1] = Point2f(camWidth,0);
     dstPt[2] = Point2f(camWidth, camHeight);
@@ -77,11 +73,11 @@ void ofPerspective::update() {
 void ofPerspective::draw() {
     ofSetColor(255);
     srcImg.update();
-    srcImg.draw(0,0,camWidth/4,camHeight/4);
+    srcImg.draw(camWidth*3/4,0,camWidth/4,camHeight/4);
     dstImg.update();
     
     if(b_DrawImage){
-        dstImg.draw(0, camHeight/4,camWidth/4,camHeight/4);
+        dstImg.draw(camWidth*3/4, camHeight/4,camWidth/4,camHeight/4);
     }
     else{
         dstImg.draw(0, 0, camWidth,camHeight);

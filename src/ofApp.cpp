@@ -56,7 +56,9 @@ void ofApp::update() {
 void ofApp::draw() {
     ofSetColor(255);
     detect.draw();
-    perspective.draw();
+    if(b_DrawImage){
+        perspective.draw();
+    }
 }
 
 void ofApp::keyPressed(int key) {
@@ -64,17 +66,17 @@ void ofApp::keyPressed(int key) {
     if(key == 'g') detect.bHideGui = !detect.bHideGui;
     if(key == 's') detect.saveParam();
     if(key == 'l') detect.loadParam();
-    if(key == 'c') perspective.toggleImage();
+    //if(key == 'c') perspective.toggleImage();
     if(key == 'd') b_DrawImage = !b_DrawImage;
 }
 
 void ofApp::mouseDragged(int x, int y, int button){
-    perspective.mouseDragged(mouseX, mouseY, button);
+    if(b_DrawImage)perspective.mouseDragged(mouseX, mouseY, button);
 }
 void ofApp::mousePressed(int x, int y, int button){
-    perspective.mousePressed(mouseX, mouseY, button);
+    if(b_DrawImage)perspective.mousePressed(mouseX, mouseY, button);
 }
 void ofApp::mouseReleased(int x, int y, int button){
-    perspective.mouseReleased(mouseX, mouseY, button);
+    if(b_DrawImage)perspective.mouseReleased(mouseX, mouseY, button);
 }
 
