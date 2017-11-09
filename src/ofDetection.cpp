@@ -33,6 +33,13 @@ void ofDetection::setup() {
     sender.setup(HOST, PORT);
     i_ShowMode = 0;
     bHideGui = true;
+    
+    red.load("red.png");
+    green.load("green.png");
+    blue.load("blue.png");
+    redl.load("redl.png");
+    redd.load("redd.png");
+    
 }
 
 void ofDetection::areaChanged(int &val){
@@ -111,7 +118,11 @@ void ofDetection::draw() {
             s.allocate(width, height);
             v.allocate(width, height);
 
-            rgb.setFromPixels(detPixels);
+            redl.resize(width, height);
+
+            rgb.setFromPixels(redl.getPixels());
+            //rgb.setFromPixels(detPixels);
+
             string msg ;
             cvCvtColor(rgb.getCvImage(), hsv.getCvImage(), CV_BGR2HSV);
             //h.setFromPixels(hsv.getPixels().getChannel(0));
@@ -132,6 +143,7 @@ void ofDetection::draw() {
             }
             //ofPixels rgbPixels;
             //rgbPixels = rgb.getPixels();
+            rgb.draw(0,0);
             //cout << int(hsvPixels.getData()[0]) <<endl;
             if(countH > 10){
                 msg = ofToString(float(aveH)/countH);
@@ -140,7 +152,8 @@ void ofDetection::draw() {
             //ofSetColor(int(rgbPixels.getData()[0]), int(rgbPixels.getData()[1]), int(rgbPixels.getData()[2]));
             //ofDrawRectangle(0, 0, 20, 20);
             //h.draw(0, 0);
-            
+            ofSetColor(255);
+            //red.draw(0,0);
             int label = contourFinder.getLabel(i);
             //string msg = ofToString(label) + ":" + ofToString(tracker.getAge(label));
             ofVec2f velocity = toOf(contourFinder.getVelocity(i));

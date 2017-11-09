@@ -1,0 +1,16 @@
+<group>
+	<radMin>1</radMin>
+	<radMax>11</radMax>
+	<th_detection>200</th_detection>
+	<th_binarization>39</th_binarization>
+	<histscale>10</histscale>
+	<detectSpeedMin>4</detectSpeedMin>
+	<detectSpeedMax>13</detectSpeedMax>
+	<detectAreaTop>20</detectAreaTop>
+	<detectAreaTopL>64</detectAreaTopL>
+	<detectAreaTopR>192</detectAreaTopR>
+	<detectAreaBottom>236</detectAreaBottom>
+	<detectAreaBottomL>32</detectAreaBottomL>
+	<detectAreaBottomR>224</detectAreaBottomR>
+<group/>
+</group>

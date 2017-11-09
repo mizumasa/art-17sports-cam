@@ -75,4 +75,6 @@ private:
     ofxCvGrayscaleImage r, g, b;
     ofxCvGrayscaleImage h, s, v;
     vector<float> histogramH, histogramS, histogramV;
+    
+    ofImage red,green,blue,redd,redl;
 };
