@@ -39,7 +39,8 @@ void ofApp::update() {
         colorImg.setFromPixels(vidGrabber.getPixels());
         grayImage = colorImg;
         if(b_DrawImage){
-            detect.setPixels(grayImage.getPixels());
+            //detect.setPixels(grayImage.getPixels());
+            detect.setColorPixels(colorImg.getPixels());
         }else{
             detect.setColorPixels(perspective.getPixels());
         }

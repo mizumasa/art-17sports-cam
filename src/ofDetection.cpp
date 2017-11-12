@@ -38,6 +38,7 @@ void ofDetection::setup() {
     green.load("green.png");
     blue.load("blue.png");
     redl.load("redl.png");
+    redn.load("redl.png");
     redd.load("redd.png");
     
 }
@@ -92,18 +93,19 @@ void ofDetection::draw() {
 #endif
     contourFinder.draw();
     if(!bHideGui){
-        gui.draw();
         ofPixels colorPixels;
+        colorPixels.allocate(colorImg.width, colorImg.height, OF_PIXELS_RGB);
         colorPixels = colorImg.getPixels();
         for(int i = 0; i < contourFinder.size(); i++) {
             ofPoint center = toOf(contourFinder.getCenter(i));
             cv::Rect rect = contourFinder.getBoundingRect(i);
             ofPixels detPixels;
+            detPixels.allocate(rect.width, rect.height, OF_PIXELS_RGB);
             colorPixels.cropTo(detPixels,center.x - rect.width/2,center.y - rect.height/2,rect.width,rect.height);
             ofPushMatrix();
             ofTranslate(center.x - rect.width/2, center.y - rect.height/2);
             
-            if(0){//raw color Image
+            if(1){//raw color Image
                 ofImage detImage;
                 detImage.setFromPixels(detPixels);
                 ofSetColor(255, 255, 255);
@@ -118,10 +120,16 @@ void ofDetection::draw() {
             s.allocate(width, height);
             v.allocate(width, height);
 
+            green.resize(width, height);
+            blue.resize(width, height);
             redl.resize(width, height);
+            redd.resize(width, height);
+            redn.resize(width, height);
 
-            rgb.setFromPixels(redl.getPixels());
-            //rgb.setFromPixels(detPixels);
+            //rgb.setFromPixels(blue.getPixels());
+            cout << rgb.width << rgb.height << endl;
+            cout << detPixels.getWidth() << detPixels.getHeight() << endl;
+            rgb.setFromPixels(detPixels);
 
             string msg ;
             cvCvtColor(rgb.getCvImage(), hsv.getCvImage(), CV_BGR2HSV);
@@ -133,20 +141,33 @@ void ofDetection::draw() {
             ofPixels hsvPixels;
             hsvPixels = hsv.getPixels();
             unsigned char * buf = hsvPixels.getData();
+            ofPixels rgbPixels;
+            rgbPixels = rgb.getPixels();
+            unsigned char * bufRGB = rgbPixels.getData();
+
             int aveH = 0;
             int countH = 0;
             for(int j = 0 ;j<width*height; j++){
                 if(int(buf[j*3+1]) > 128 and int(buf[j*3+2])> 128){
                     aveH += int(buf[j*3]);
                     countH++;
+                }else{
+                    bufRGB[j*3]=0;
+                    bufRGB[j*3+1]=0;
+                    bufRGB[j*3+2]=0;
                 }
             }
             //ofPixels rgbPixels;
             //rgbPixels = rgb.getPixels();
+            ofSetColor(255);
+            rgb.setFromPixels(bufRGB,width, height);
             rgb.draw(0,0);
+            //redl.draw(0,0);
             //cout << int(hsvPixels.getData()[0]) <<endl;
+            bool b_DrawMsg = false;
             if(countH > 10){
                 msg = ofToString(float(aveH)/countH);
+                b_DrawMsg = true;
             }
             //string msg = ofToString(hsvPixels.getData()[0])+":"+ofToString(hsvPixels.getData()[1])+":"+ofToString(hsvPixels.getData()[2]);
             //ofSetColor(int(rgbPixels.getData()[0]), int(rgbPixels.getData()[1]), int(rgbPixels.getData()[2]));
@@ -161,10 +182,12 @@ void ofDetection::draw() {
             ofScale(5, 5);
             ofSetColor(0, 255, 0);
             ofLine(0, 0, velocity.x, velocity.y);
-            ofDrawBitmapString(msg, 0, 0);
+            if(b_DrawMsg)ofDrawBitmapString(msg, 0, 0);
             ofPopMatrix();
+            
+            
         }
-
+        gui.draw();
     }
 }
 
