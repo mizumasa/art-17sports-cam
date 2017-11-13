@@ -52,9 +52,12 @@ private:
     ofParameter<int>  radMax;
     ofParameter<int>  th;
     ofParameter<int>  _th;
-    ofParameter<int>  histscale;
-    ofParameter<int>  detectSpeedMin;
-    ofParameter<int>  detectSpeedMax;
+    ofParameter<int>  hDetectThrS;
+    ofParameter<int>  hDetectThrV;
+    
+    //ofParameter<int>  histscale;
+    //ofParameter<int>  detectSpeedMin;
+    //ofParameter<int>  detectSpeedMax;
     
     //検出エリアパラメータ 百分率
     /*
