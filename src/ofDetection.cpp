@@ -6,7 +6,8 @@ using namespace cv;
 void ofDetection::setup() {
     
     grayImage.allocate(WEB_CAM_W,WEB_CAM_H);
-    
+    grayImageThr.allocate(WEB_CAM_W,WEB_CAM_H);
+
     gui.setup("panel");
     gui.add(radMin.set("radMin", 1,1,10));
     gui.add(radMax.set("radMax", 11,11,200));
@@ -42,7 +43,8 @@ void ofDetection::setup() {
     redl.load("redl.png");
     redn.load("redl.png");
     redd.load("redd.png");
-    
+
+    sender.setup(HOST, PORT);
 }
 
 void ofDetection::areaChanged(int &val){
@@ -73,10 +75,15 @@ void ofDetection::update() {
     grayImageThr.threshold(_th);
     contourFinder.findContours(grayImageThr);
     
-    
+    for(int i = 0; i < contourFinder.size(); i++) {
+        ofPoint center = toOf(contourFinder.getCenter(i));
+        ofxOscMessage m;
+        m.setAddress("/mouse/position");
+        m.addIntArg(center.x);
+        m.addIntArg(center.y);
+        sender.sendMessage(m);
+    }
 }
-
-
 
 void ofDetection::draw() {
     RectTracker& tracker = contourFinder.getTracker();
@@ -129,8 +136,8 @@ void ofDetection::draw() {
             redn.resize(width, height);
 
             //rgb.setFromPixels(blue.getPixels());
-            cout << rgb.width << rgb.height << endl;
-            cout << detPixels.getWidth() << detPixels.getHeight() << endl;
+            //cout << rgb.width << rgb.height << endl;
+            //cout << detPixels.getWidth() << detPixels.getHeight() << endl;
             rgb.setFromPixels(detPixels);
 
             string msg ;

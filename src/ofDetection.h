@@ -80,4 +80,5 @@ private:
     vector<float> histogramH, histogramS, histogramV;
     
     ofImage red,green,blue,redd,redl,redn;
+
 };
