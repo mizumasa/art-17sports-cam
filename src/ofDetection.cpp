@@ -33,7 +33,6 @@ void ofDetection::setup() {
     //histscale.addListener(this, &ofDetection::valChanged);
     
     //osc sender
-    sender.setup(HOST, PORT);
     i_ShowMode = 0;
     bHideGui = true;
     
@@ -75,15 +74,20 @@ void ofDetection::update() {
     grayImageThr.threshold(_th);
     contourFinder.findContours(grayImageThr);
     
-    for(int i = 0; i < contourFinder.size(); i++) {
-        ofPoint center = toOf(contourFinder.getCenter(i));
-        ofxOscMessage m;
-        m.setAddress("/mouse/position");
-        m.addIntArg(center.x);
-        m.addIntArg(center.y);
-        sender.sendMessage(m);
-    }
 }
+
+void ofDetection::sendPosOSC(int x,int y){
+    ofxOscMessage m;
+    m.setAddress("/debug/position");
+    char x_;
+    char y_;
+    x_ = (char)(int)(255*x/ofGetWidth());
+    y_ = (char)(int)(255*y/ofGetHeight());
+    m.addCharArg(x_);
+    m.addCharArg(y_);
+    sender.sendMessage(m);
+}
+
 
 void ofDetection::draw() {
     RectTracker& tracker = contourFinder.getTracker();
@@ -191,6 +195,17 @@ void ofDetection::draw() {
                 msg = ofToString(score);
                 //msg = ofToString(valH);
                 b_DrawMsg = true;
+                
+                ofxOscMessage m;
+                m.setAddress("/mouse/position");
+                char x_;
+                char y_;
+                x_ = (char)(int)(255*center.x/ofGetWidth());
+                y_ = (char)(int)(255*center.y/ofGetHeight());
+                m.addCharArg(x_);
+                m.addCharArg(y_);
+                m.addCharArg((char)score);
+                sender.sendMessage(m);
             }
             //string msg = ofToString(hsvPixels.getData()[0])+":"+ofToString(hsvPixels.getData()[1])+":"+ofToString(hsvPixels.getData()[2]);
             //ofSetColor(int(rgbPixels.getData()[0]), int(rgbPixels.getData()[1]), int(rgbPixels.getData()[2]));

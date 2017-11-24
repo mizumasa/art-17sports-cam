@@ -60,6 +60,14 @@ void ofApp::draw() {
     if(b_DrawImage){
         perspective.draw();
     }
+    if(!(detect.bHideGui)){
+        string info = "";
+        info += "space key draw binarized image\n";
+        info += " d key toggle perspective or raw image\n";
+        info += " ";
+        ofSetColor(255,255,255);
+        ofDrawBitmapString(info, 20,ofGetHeight()/2);
+    }
 }
 
 void ofApp::keyPressed(int key) {
@@ -69,6 +77,7 @@ void ofApp::keyPressed(int key) {
     if(key == 'l') detect.loadParam();
     //if(key == 'c') perspective.toggleImage();
     if(key == 'd') b_DrawImage = !b_DrawImage;
+    if(key == 'f') ofToggleFullscreen();
 }
 
 void ofApp::mouseDragged(int x, int y, int button){
@@ -76,6 +85,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 }
 void ofApp::mousePressed(int x, int y, int button){
     if(b_DrawImage)perspective.mousePressed(mouseX, mouseY, button);
+    detect.sendPosOSC(x,y);
 }
 void ofApp::mouseReleased(int x, int y, int button){
     if(b_DrawImage)perspective.mouseReleased(mouseX, mouseY, button);

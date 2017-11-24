@@ -9,8 +9,6 @@
 #include "ofPerspective.h"
 
 
-
-
 class ofApp : public ofBaseApp {
 public:
     void setup();
@@ -34,4 +32,5 @@ public:
     ofPerspective perspective;
 
     bool b_DrawImage;
+    
 };

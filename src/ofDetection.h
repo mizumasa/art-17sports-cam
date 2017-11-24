@@ -8,7 +8,6 @@
 
 #define HOST "localhost"
 //#define HOST "10.0.1.24"
-
 #define PORT 12345
 
 #define MAXSENDSIZE 400
@@ -29,6 +28,7 @@ public:
     void toggleImage();
     void saveParam();
     void loadParam();
+    void sendPosOSC(int x,int y);
     
     bool bHideGui = false;
 
