@@ -12,9 +12,13 @@
 
 #define MAXSENDSIZE 400
 
-#define _USE_LIVE_VIDEO
+//#define _USE_LIVE_VIDEO
 #define WEB_CAM_W 1280
 #define WEB_CAM_H 720
+#define TEST_VIDEO_W 1920
+#define TEST_VIDEO_H 1080
+#define CAPTURE_W 1280
+#define CAPTURE_H 720
 
 
 class ofDetection{

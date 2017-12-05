@@ -13,7 +13,7 @@ void ofApp::setup() {
     vidGrabber.setDeviceID(0);
     vidGrabber.initGrabber(WEB_CAM_W,WEB_CAM_H);
 #else
-    movie.loadMovie("video2.mov");
+    movie.loadMovie("MAH00013.MP4");
     movie.setVolume(0.0);
     movie.play();
 #endif
@@ -48,7 +48,20 @@ void ofApp::update() {
 #else
     movie.update();
     if(movie.isFrameNew()) {
-        blur(movie, 10);
+        ofPixels movieBuf;
+        movieBuf = movie.getPixels();
+        movieBuf.resize(CAPTURE_W,CAPTURE_H);
+        perspective.setPixels(movieBuf);
+        perspective.update();
+        
+        colorImg.setFromPixels(movieBuf);
+        grayImage = colorImg;
+        if(b_DrawImage){
+            //detect.setPixels(grayImage.getPixels());
+            detect.setColorPixels(colorImg.getPixels());
+        }else{
+            detect.setColorPixels(perspective.getPixels());
+        }
     }
 #endif
     detect.update();

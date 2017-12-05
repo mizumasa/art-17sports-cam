@@ -92,7 +92,6 @@ void ofDetection::sendPosOSC(int x,int y){
 void ofDetection::draw() {
     RectTracker& tracker = contourFinder.getTracker();
     ofSetColor(255);
-#ifdef _USE_LIVE_VIDEO
     switch(i_ShowMode){
         case 0:
             grayImage.draw(0, 0);
@@ -103,7 +102,6 @@ void ofDetection::draw() {
         default:
             break;
     }
-#endif
     contourFinder.draw();
     if(!bHideGui){
         ofPixels colorPixels;
