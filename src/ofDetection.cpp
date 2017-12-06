@@ -9,6 +9,11 @@ void ofDetection::setup() {
     grayImageThr.allocate(WEB_CAM_W,WEB_CAM_H);
 
     gui.setup("panel");
+    gui.add(ptMin.set("grad top Min", 0,-100,255));
+    gui.add(ptMax.set("grad top Max", 255,0,500));
+    gui.add(pbMin.set("grad bottom Min", 0,-100,255));
+    gui.add(pbMax.set("grad bottom Max", 255,0,500));
+
     gui.add(radMin.set("radMin", 1,1,10));
     gui.add(radMax.set("radMax", 11,11,200));
     gui.add(th.set("contourFinder detection Thr", 200,0,255));             //cv側の検出のthreshold(2値化しないとき)
@@ -22,11 +27,18 @@ void ofDetection::setup() {
     contourFinder.setMinAreaRadius(radMin);
     contourFinder.setMaxAreaRadius(radMax);
     contourFinder.setThreshold(th);
+    setGradVarticle(ptMin,ptMax,pbMin,pbMax);
+
     // wait for half a frame before forgetting something
     contourFinder.getTracker().setPersistence(15);          //見失っても覚えててくれるパラメータ
     // an object can move up to 100 pixels per frame
     contourFinder.getTracker().setMaximumDistance(100);     //横振りとるために増やしました
     
+    ptMin.addListener(this, &ofDetection::valChanged);
+    ptMax.addListener(this, &ofDetection::valChanged);
+    pbMin.addListener(this, &ofDetection::valChanged);
+    pbMax.addListener(this, &ofDetection::valChanged);
+
     radMin.addListener(this, &ofDetection::valChanged);
     radMax.addListener(this, &ofDetection::valChanged);
     th.addListener(this, &ofDetection::valChanged);
@@ -44,6 +56,8 @@ void ofDetection::setup() {
     redd.load("redd.png");
 
     sender.setup(HOST, PORT);
+    senderToL.setup(HOST_TO_L, PORT_TO_L);
+    senderToR.setup(HOST_TO_R, PORT_TO_R);
 }
 
 void ofDetection::areaChanged(int &val){
@@ -54,6 +68,7 @@ void ofDetection::valChanged(int &val){
     contourFinder.setMinAreaRadius(radMin);
     contourFinder.setMaxAreaRadius(radMax);
     contourFinder.setThreshold(th);
+    setGradVarticle(ptMin,ptMax,pbMin,pbMax);
 }
 
 void ofDetection::setPixels(ofPixels _pixels){
@@ -68,8 +83,32 @@ ofPixels ofDetection::getPixels(){
     return grayImage.getPixels();
 }
 
+void ofDetection::setGradVarticle(int tMin,int tMax,int bMin,int bMax){
+    i_tMin = tMin;
+    i_tMax = tMax;
+    i_bMin = bMin;
+    i_bMax = bMax;
+}
+
 
 void ofDetection::update() {
+    ofPixels grayImagePixel;
+    int w,h;
+    w = grayImage.getWidth();
+    h = grayImage.getHeight();
+    grayImagePixel.allocate(w, h, OF_IMAGE_GRAYSCALE);
+    unsigned char *data = grayImagePixel.getData();
+    unsigned char *data2 = grayImage.getPixels().getData();
+    int _Min,_Max,_H;
+    for(int i=0;i<h;i++){
+        _Min = int((i_tMin * (h-i)+i_bMin * i)/h);
+        _Max = int((i_tMax * (h-i)+i_bMax * i)/h);
+        _H = _Max - _Min;
+        for(int j=0;j<w;j++){
+            data[i*w+j] = int(ofClamp( 255 * (data2[i*w+j] - _Min) / _H, 0, 255));
+        }
+    }
+    grayImage.setFromPixels(grayImagePixel);
     grayImageThr = grayImage;
     grayImageThr.threshold(_th);
     contourFinder.findContours(grayImageThr);

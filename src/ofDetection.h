@@ -10,6 +10,12 @@
 //#define HOST "10.0.1.24"
 #define PORT 12345
 
+#define HOST_TO_L "localhost"
+#define HOST_TO_R "localhost"
+#define PORT_TO_L 12345
+#define PORT_TO_R 12345
+
+
 #define MAXSENDSIZE 400
 
 //#define _USE_LIVE_VIDEO
@@ -33,6 +39,7 @@ public:
     void saveParam();
     void loadParam();
     void sendPosOSC(int x,int y);
+    void setGradVarticle(int tMin,int tMax,int bMin,int bMax);
     
     bool bHideGui = false;
 
@@ -40,6 +47,8 @@ private:
     
     ofTrueTypeFont font;
     ofxOscSender sender;
+    ofxOscSender senderToL;
+    ofxOscSender senderToR;
     int sendhistory[MAXSENDSIZE];
     
     float threshold;
@@ -58,7 +67,12 @@ private:
     ofParameter<int>  _th;
     ofParameter<int>  hDetectThrS;
     ofParameter<int>  hDetectThrV;
-    
+
+    ofParameter<int>  ptMin;
+    ofParameter<int>  ptMax;
+    ofParameter<int>  pbMin;
+    ofParameter<int>  pbMax;
+
     //ofParameter<int>  histscale;
     //ofParameter<int>  detectSpeedMin;
     //ofParameter<int>  detectSpeedMax;
@@ -84,5 +98,7 @@ private:
     vector<float> histogramH, histogramS, histogramV;
     
     ofImage red,green,blue,redd,redl,redn;
+    
+    int i_tMin,i_tMax,i_bMin,i_bMax;
 
 };
