@@ -65,6 +65,7 @@ void ofApp::update() {
     }
 #endif
     detect.update();
+    ofSetWindowTitle("cam:"+ofToString(ofGetFrameRate()));
 }
 
 void ofApp::draw() {

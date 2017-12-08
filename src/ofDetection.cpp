@@ -125,6 +125,8 @@ void ofDetection::sendPosOSC(int x,int y){
     m.addCharArg(x_);
     m.addCharArg(y_);
     sender.sendMessage(m);
+    senderToL.sendMessage(m);
+    senderToR.sendMessage(m);
 }
 
 
@@ -243,6 +245,8 @@ void ofDetection::draw() {
                 m.addCharArg(y_);
                 m.addCharArg((char)score);
                 sender.sendMessage(m);
+                senderToL.sendMessage(m);
+                senderToR.sendMessage(m);
             }
             //string msg = ofToString(hsvPixels.getData()[0])+":"+ofToString(hsvPixels.getData()[1])+":"+ofToString(hsvPixels.getData()[2]);
             //ofSetColor(int(rgbPixels.getData()[0]), int(rgbPixels.getData()[1]), int(rgbPixels.getData()[2]));
