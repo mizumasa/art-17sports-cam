@@ -18,7 +18,7 @@
 
 #define MAXSENDSIZE 400
 
-//#define _USE_LIVE_VIDEO
+#define _USE_LIVE_VIDEO
 #define WEB_CAM_W 1280
 #define WEB_CAM_H 720
 #define TEST_VIDEO_W 1920
@@ -26,6 +26,15 @@
 #define CAPTURE_W 1280
 #define CAPTURE_H 720
 
+enum t_DetectMode{
+    DET_MODE_GRAY = 0,
+    DET_MODE_BLUE,
+    DET_MODE_GREEN,
+    DET_MODE_RGDIFF,
+    DET_MODE_RBDIFF,
+    DET_MODE_GBDIFF,
+    DET_MODE_DEFAULT,
+};
 
 class ofDetection{
 public:
@@ -36,13 +45,14 @@ public:
     void update();
     void draw();
     void toggleImage();
+    void keyPressed(int key);
     void saveParam();
     void loadParam();
     void sendPosOSC(int x,int y);
     void setGradVarticle(int tMin,int tMax,int bMin,int bMax);
     
     bool bHideGui = false;
-
+    void allocate(int w,int h);
 private:
     
     ofTrueTypeFont font;
@@ -95,10 +105,14 @@ private:
     ofxCvColorImage rgb, hsv;
     ofxCvGrayscaleImage r, g, b;
     ofxCvGrayscaleImage h, s, v;
+    
+    ofxCvGrayscaleImage rFull, gFull, bFull;
     vector<float> histogramH, histogramS, histogramV;
     
     ofImage red,green,blue,redd,redl,redn;
     
     int i_tMin,i_tMax,i_bMin,i_bMax;
+    
+    t_DetectMode detectMode;
 
 };

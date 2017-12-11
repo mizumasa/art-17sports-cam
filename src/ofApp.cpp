@@ -8,7 +8,10 @@ using namespace cv;
 void ofApp::setup() {
     ofSetVerticalSync(true);
     ofBackground(0);
-    
+
+    detectWidth = CAPTURE_W;
+    detectHeight = CAPTURE_H;
+    detect.allocate(detectWidth,detectHeight);
 #ifdef _USE_LIVE_VIDEO
     vidGrabber.setDeviceID(0);
     vidGrabber.initGrabber(WEB_CAM_W,WEB_CAM_H);
@@ -85,6 +88,7 @@ void ofApp::draw() {
 }
 
 void ofApp::keyPressed(int key) {
+    detect.keyPressed(key);
     if(key == ' ') detect.toggleImage();
     if(key == 'g') detect.bHideGui = !detect.bHideGui;
     if(key == 's') detect.saveParam();

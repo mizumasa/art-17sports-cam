@@ -58,7 +58,16 @@ void ofDetection::setup() {
     sender.setup(HOST, PORT);
     senderToL.setup(HOST_TO_L, PORT_TO_L);
     senderToR.setup(HOST_TO_R, PORT_TO_R);
+    
+    detectMode = DET_MODE_GRAY;
 }
+
+void ofDetection::allocate(int w,int h){
+    rFull.allocate(w,h);
+    gFull.allocate(w,h);
+    bFull.allocate(w,h);
+}
+
 
 void ofDetection::areaChanged(int &val){
     bClearLog=true;
@@ -76,7 +85,55 @@ void ofDetection::setPixels(ofPixels _pixels){
 }
 void ofDetection::setColorPixels(ofPixels _pixels){
     colorImg.setFromPixels(_pixels);
-    grayImage = colorImg;
+    ofxCvGrayscaleImage grayDiff;
+    int width,height;
+    width = _pixels.getWidth();
+    height = _pixels.getHeight();
+    switch(detectMode){
+        case DET_MODE_GRAY:
+        {
+            grayImage = colorImg;
+            break;
+        }
+        case DET_MODE_BLUE:
+        {
+            bFull.setFromPixels(_pixels.getChannel(2));
+            grayImage = bFull;
+            break;
+        }
+        case DET_MODE_GREEN:
+        {
+            gFull.setFromPixels(_pixels.getChannel(1));
+            grayImage = gFull;
+            break;
+        }
+        case DET_MODE_RGDIFF:
+        {
+            grayDiff.allocate(width, height);
+            grayDiff.absDiff(rFull, gFull);
+            grayImage = grayDiff;
+            break;
+        }
+        case DET_MODE_RBDIFF:
+        {
+            grayDiff.allocate(width, height);
+            grayDiff.absDiff(rFull, bFull);
+            grayImage = grayDiff;
+            break;
+        }
+        case DET_MODE_GBDIFF:
+        {
+            grayDiff.allocate(width, height);
+            grayDiff.absDiff(gFull, bFull);
+            grayImage = grayDiff;
+            break;
+        }
+        case DET_MODE_DEFAULT:
+        {
+            grayImage = colorImg;
+            break;
+        }
+    }
 }
 
 ofPixels ofDetection::getPixels(){
@@ -112,7 +169,7 @@ void ofDetection::update() {
     grayImageThr = grayImage;
     grayImageThr.threshold(_th);
     contourFinder.findContours(grayImageThr);
-    
+    ofSetWindowTitle(ofToString(detectMode));
 }
 
 void ofDetection::sendPosOSC(int x,int y){
@@ -143,7 +200,18 @@ void ofDetection::draw() {
         default:
             break;
     }
+    
     contourFinder.draw();
+
+/*
+    rFull.draw(0,ofGetHeight()*3/4,ofGetWidth()/4,ofGetHeight()/4);
+    gFull.draw(ofGetWidth()/4,ofGetHeight()*3/4,ofGetWidth()/4,ofGetHeight()/4);
+    bFull.draw(ofGetWidth()/2,ofGetHeight()*3/4,ofGetWidth()/4,ofGetHeight()/4);
+    ofxCvGrayscaleImage grayDiff;
+    grayDiff.absDiff(gFull, bFull);
+    grayDiff.draw(ofGetWidth()*3/4,ofGetHeight()*3/4,ofGetWidth()/4,ofGetHeight()/4);
+ */
+    
     if(!bHideGui){
         ofPixels colorPixels;
         colorPixels.allocate(colorImg.width, colorImg.height, OF_PIXELS_RGB);
@@ -270,6 +338,14 @@ void ofDetection::draw() {
     }
 }
 
+void ofDetection::keyPressed(int key) {
+    if(key == OF_KEY_UP){
+        detectMode = t_DetectMode( min(detectMode + 1,(int)(DET_MODE_DEFAULT)));
+    }
+    if(key == OF_KEY_DOWN){
+        detectMode = t_DetectMode( max(detectMode - 1,0));
+    }
+}
 void ofDetection::toggleImage(){
     i_ShowMode = (i_ShowMode + 1) %2;
 }

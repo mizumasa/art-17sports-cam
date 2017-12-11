@@ -20,7 +20,8 @@ public:
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
 
-    
+    int detectWidth;
+    int detectHeight;
 #ifdef _USE_LIVE_VIDEO
 		  ofVideoGrabber 		vidGrabber;
 #else
@@ -31,6 +32,7 @@ public:
     ofDetection detect;
     ofPerspective perspective;
 
+    
     bool b_DrawImage;
     
 };
