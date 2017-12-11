@@ -33,6 +33,8 @@ enum t_DetectMode{
     DET_MODE_RGDIFF,
     DET_MODE_RBDIFF,
     DET_MODE_GBDIFF,
+    DET_MODE_GBMIX,
+    DET_MODE_GBDIFFMIX,
     DET_MODE_DEFAULT,
 };
 
@@ -52,7 +54,9 @@ public:
     void setGradVarticle(int tMin,int tMax,int bMin,int bMax);
     
     bool bHideGui = false;
-    void allocate(int w,int h);
+    void initAllocate(int w,int h);
+    t_DetectMode detectMode;
+
 private:
     
     ofTrueTypeFont font;
@@ -82,6 +86,9 @@ private:
     ofParameter<int>  ptMax;
     ofParameter<int>  pbMin;
     ofParameter<int>  pbMax;
+    ofParameter<float> pbMixBalanceGBDiff;
+    ofParameter<float> pbMixBalanceGBSum;
+    ofParameter<int>  pbMixGBThr;
 
     //ofParameter<int>  histscale;
     //ofParameter<int>  detectSpeedMin;
@@ -106,13 +113,15 @@ private:
     ofxCvGrayscaleImage r, g, b;
     ofxCvGrayscaleImage h, s, v;
     
-    ofxCvGrayscaleImage rFull, gFull, bFull;
+    ofxCvGrayscaleImage rFull, gFull, bFull, gbFull;
+    ofxCvGrayscaleImage grayDiff;
+
     vector<float> histogramH, histogramS, histogramV;
     
     ofImage red,green,blue,redd,redl,redn;
     
     int i_tMin,i_tMax,i_bMin,i_bMax;
+    vector<ofVec3f> vf_RotateCheck;
     
-    t_DetectMode detectMode;
 
 };

@@ -20,6 +20,9 @@ void ofDetection::setup() {
     gui.add(_th.set("Thr for binarization", 230,0,255));         //2値化のためのthreshold
     gui.add(hDetectThrS.set("H detect thr S", 128,0,255));
     gui.add(hDetectThrV.set("H detect thr V", 128,0,255));
+    gui.add(pbMixBalanceGBDiff.set("MixBalanceGBDiff", 1.0, 0.001, 3.0));
+    gui.add(pbMixBalanceGBSum.set("MixBalanceGBSum", 1.0, 0.001, 3.0));
+    gui.add(pbMixGBThr.set("MixGBThr", 200,0,255));
     //gui.add(histscale.set("histscale", 10,3,50));
     //gui.add(detectSpeedMin.set("detectSpeedMin", 4,1,30));
     //gui.add(detectSpeedMax.set("detectSpeedMax", 30,1,30));
@@ -62,10 +65,12 @@ void ofDetection::setup() {
     detectMode = DET_MODE_GRAY;
 }
 
-void ofDetection::allocate(int w,int h){
+void ofDetection::initAllocate(int w,int h){
     rFull.allocate(w,h);
     gFull.allocate(w,h);
     bFull.allocate(w,h);
+    gbFull.allocate(w,h);
+    grayDiff.allocate(w, h);
 }
 
 
@@ -85,7 +90,6 @@ void ofDetection::setPixels(ofPixels _pixels){
 }
 void ofDetection::setColorPixels(ofPixels _pixels){
     colorImg.setFromPixels(_pixels);
-    ofxCvGrayscaleImage grayDiff;
     int width,height;
     width = _pixels.getWidth();
     height = _pixels.getHeight();
@@ -109,23 +113,45 @@ void ofDetection::setColorPixels(ofPixels _pixels){
         }
         case DET_MODE_RGDIFF:
         {
-            grayDiff.allocate(width, height);
+            rFull.setFromPixels(_pixels.getChannel(0));
+            gFull.setFromPixels(_pixels.getChannel(1));
             grayDiff.absDiff(rFull, gFull);
             grayImage = grayDiff;
             break;
         }
         case DET_MODE_RBDIFF:
         {
-            grayDiff.allocate(width, height);
+            rFull.setFromPixels(_pixels.getChannel(0));
+            bFull.setFromPixels(_pixels.getChannel(2));
             grayDiff.absDiff(rFull, bFull);
             grayImage = grayDiff;
             break;
         }
         case DET_MODE_GBDIFF:
         {
-            grayDiff.allocate(width, height);
+            gFull.setFromPixels(_pixels.getChannel(1));
+            bFull.setFromPixels(_pixels.getChannel(2));
             grayDiff.absDiff(gFull, bFull);
             grayImage = grayDiff;
+            break;
+        }
+        case DET_MODE_GBMIX:
+        {
+            gFull.setFromPixels(_pixels.getChannel(1));
+            bFull.setFromPixels(_pixels.getChannel(2));
+            cvAddWeighted(gFull.getCvImage(), 0.5, bFull.getCvImage(),0.5, 0, gbFull.getCvImage());
+            gbFull.threshold(pbMixGBThr);
+            grayImage = gbFull;
+            break;
+        }
+        case DET_MODE_GBDIFFMIX:
+        {
+            gFull.setFromPixels(_pixels.getChannel(1));
+            bFull.setFromPixels(_pixels.getChannel(2));
+            cvAddWeighted(gFull.getCvImage(), 0.5, bFull.getCvImage(),0.5, 0, gbFull.getCvImage());
+            gbFull.threshold(pbMixGBThr);
+            grayDiff.absDiff(gFull, bFull);
+            cvAddWeighted(gbFull.getCvImage(), pbMixBalanceGBSum/(pbMixBalanceGBSum+pbMixBalanceGBDiff), grayDiff.getCvImage(),pbMixBalanceGBDiff/(pbMixBalanceGBSum+pbMixBalanceGBDiff), 0, grayImage.getCvImage());
             break;
         }
         case DET_MODE_DEFAULT:
@@ -169,7 +195,7 @@ void ofDetection::update() {
     grayImageThr = grayImage;
     grayImageThr.threshold(_th);
     contourFinder.findContours(grayImageThr);
-    ofSetWindowTitle(ofToString(detectMode));
+    
 }
 
 void ofDetection::sendPosOSC(int x,int y){
@@ -218,13 +244,41 @@ void ofDetection::draw() {
         colorPixels = colorImg.getPixels();
         for(int i = 0; i < contourFinder.size(); i++) {
             ofPoint center = toOf(contourFinder.getCenter(i));
+            ofVec2f velocity = toOf(contourFinder.getVelocity(i));
+            int label = contourFinder.getLabel(i);
+            if(label >= vf_RotateCheck.size()){
+                for(int j=0; j<label+1-vf_RotateCheck.size(); j++){
+                    ofVec3f buf3f = ofVec3f(0,0,0.5);
+                    vf_RotateCheck.push_back(buf3f);
+                }
+            }
+            if(vf_RotateCheck[label][2]==0.5){
+                vf_RotateCheck[label][0]=velocity[0];
+                vf_RotateCheck[label][1]=velocity[1];
+                vf_RotateCheck[label][2]=0;
+            }else{
+                float f_rotate = vf_RotateCheck[label][0]*velocity[1]-vf_RotateCheck[label][1]*velocity[0];
+                if(f_rotate>0)vf_RotateCheck[label][2]+=10.0;
+                if(f_rotate<0)vf_RotateCheck[label][2]-=10.0;
+                vf_RotateCheck[label][0]=velocity[0];
+                vf_RotateCheck[label][1]=velocity[1];
+            }
             cv::Rect rect = contourFinder.getBoundingRect(i);
             ofPixels detPixels;
             detPixels.allocate(rect.width, rect.height, OF_PIXELS_RGB);
             colorPixels.cropTo(detPixels,center.x - rect.width/2,center.y - rect.height/2,rect.width,rect.height);
             ofPushMatrix();
-            ofTranslate(center.x - rect.width/2, center.y - rect.height/2);
-            
+            //ofTranslate(center.x - rect.width/2, center.y - rect.height/2);
+            ofTranslate(center.x, center.y);
+            ofPushStyle();
+            ofSetColor(0, 255, 255);
+            ofDrawLine(0, 0, velocity[0],  velocity[1]);
+            ofPopStyle();
+            ofPushStyle();
+            ofSetColor(int(ofClamp(vf_RotateCheck[label][2],0,255)),0,int(ofClamp(-vf_RotateCheck[label][2],0,255)));
+            ofFill();
+            ofDrawCircle(0, 0, 20);
+            ofPopStyle();
             if(1){//raw color Image
                 ofImage detImage;
                 detImage.setFromPixels(detPixels);
@@ -300,7 +354,8 @@ void ofDetection::draw() {
                     }
                 }
                 msg = ofToString(score);
-                //msg = ofToString(valH);
+                msg += "¥n";
+                msg += ofToString(tracker.getAge(label));
                 b_DrawMsg = true;
                 
                 ofxOscMessage m;
@@ -322,7 +377,7 @@ void ofDetection::draw() {
             //h.draw(0, 0);
             ofSetColor(255);
             //red.draw(0,0);
-            int label = contourFinder.getLabel(i);
+            //int label = contourFinder.getLabel(i);
             //string msg = ofToString(label) + ":" + ofToString(tracker.getAge(label));
             //string msg = ofToString(velocity.x)+":"+ofToString(velocity.y);
             ofScale(5, 5);

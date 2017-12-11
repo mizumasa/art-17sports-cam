@@ -11,7 +11,7 @@ void ofApp::setup() {
 
     detectWidth = CAPTURE_W;
     detectHeight = CAPTURE_H;
-    detect.allocate(detectWidth,detectHeight);
+    detect.initAllocate(detectWidth,detectHeight);
 #ifdef _USE_LIVE_VIDEO
     vidGrabber.setDeviceID(0);
     vidGrabber.initGrabber(WEB_CAM_W,WEB_CAM_H);
@@ -68,7 +68,7 @@ void ofApp::update() {
     }
 #endif
     detect.update();
-    ofSetWindowTitle("cam:"+ofToString(ofGetFrameRate()));
+    ofSetWindowTitle("cam:"+ofToString(detect.detectMode)+" mode:"+ofToString(ofGetFrameRate()));
 }
 
 void ofApp::draw() {
