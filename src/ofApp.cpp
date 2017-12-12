@@ -87,9 +87,16 @@ void ofApp::draw() {
     }
 }
 
+void ofApp::keyReleased(int key) {
+    if(key == ' ') detect.sendOSC(false);
+    if(key == 'r') detect.rotateDetectOn(false);
+}
+
 void ofApp::keyPressed(int key) {
     detect.keyPressed(key);
-    if(key == ' ') detect.toggleImage();
+    if(key == 'r') detect.rotateDetectOn(true);
+    if(key == ' ') detect.sendOSC(true);
+    if(key == 'b') detect.toggleImage();
     if(key == 'g') detect.bHideGui = !detect.bHideGui;
     if(key == 's') detect.saveParam();
     if(key == 'l') detect.loadParam();

@@ -18,7 +18,7 @@
 
 #define MAXSENDSIZE 400
 
-#define _USE_LIVE_VIDEO
+//#define _USE_LIVE_VIDEO
 #define WEB_CAM_W 1280
 #define WEB_CAM_H 720
 #define TEST_VIDEO_W 1920
@@ -50,6 +50,8 @@ public:
     void keyPressed(int key);
     void saveParam();
     void loadParam();
+    void rotateDetectOn(bool _b);
+    void sendOSC(bool _b);
     void sendPosOSC(int x,int y);
     void setGradVarticle(int tMin,int tMax,int bMin,int bMax);
     
@@ -58,7 +60,8 @@ public:
     t_DetectMode detectMode;
 
 private:
-    
+    bool b_OscActive;
+    bool b_RotateDetectOn;
     ofTrueTypeFont font;
     ofxOscSender sender;
     ofxOscSender senderToL;
@@ -89,6 +92,8 @@ private:
     ofParameter<float> pbMixBalanceGBDiff;
     ofParameter<float> pbMixBalanceGBSum;
     ofParameter<int>  pbMixGBThr;
+    ofParameter<float> pbRotateSpeedThr;
+    ofParameter<int>  pbRotateSumThr;
 
     //ofParameter<int>  histscale;
     //ofParameter<int>  detectSpeedMin;

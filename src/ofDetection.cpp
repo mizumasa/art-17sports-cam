@@ -23,6 +23,10 @@ void ofDetection::setup() {
     gui.add(pbMixBalanceGBDiff.set("MixBalanceGBDiff", 1.0, 0.001, 3.0));
     gui.add(pbMixBalanceGBSum.set("MixBalanceGBSum", 1.0, 0.001, 3.0));
     gui.add(pbMixGBThr.set("MixGBThr", 200,0,255));
+    gui.add(pbRotateSpeedThr.set("RotateSpeedThr", 1.0, 0.0, 10.0));
+    gui.add(pbRotateSumThr.set("RotateSumThr", 200,0,255));
+    
+    
     //gui.add(histscale.set("histscale", 10,3,50));
     //gui.add(detectSpeedMin.set("detectSpeedMin", 4,1,30));
     //gui.add(detectSpeedMax.set("detectSpeedMax", 30,1,30));
@@ -63,6 +67,7 @@ void ofDetection::setup() {
     senderToR.setup(HOST_TO_R, PORT_TO_R);
     
     detectMode = DET_MODE_GRAY;
+    b_OscActive = false;
 }
 
 void ofDetection::initAllocate(int w,int h){
@@ -238,6 +243,86 @@ void ofDetection::draw() {
     grayDiff.draw(ofGetWidth()*3/4,ofGetHeight()*3/4,ofGetWidth()/4,ofGetHeight()/4);
  */
     
+    for(int i = 0; i < contourFinder.size(); i++) {
+        ofPoint center = toOf(contourFinder.getCenter(i));
+        ofVec2f velocity = toOf(contourFinder.getVelocity(i));
+        int label = contourFinder.getLabel(i);
+        if(label >= vf_RotateCheck.size()){
+            for(int j=0; j<label+1-vf_RotateCheck.size(); j++){
+                ofVec3f buf3f = ofVec3f(0,0,0.5);
+                vf_RotateCheck.push_back(buf3f);
+            }
+        }
+        cv::Rect rect = contourFinder.getBoundingRect(i);
+        ofPushMatrix();
+        
+        ofTranslate(center.x, center.y);
+        if(velocity.length() > pbRotateSpeedThr){
+            if(vf_RotateCheck[label][2]==0.5 ){
+                vf_RotateCheck[label][0]=velocity[0];
+                vf_RotateCheck[label][1]=velocity[1];
+                vf_RotateCheck[label][2]=0;
+            }else{
+                float f_rotate = vf_RotateCheck[label][0]*velocity[1]-vf_RotateCheck[label][1]*velocity[0];
+                if(f_rotate>0)vf_RotateCheck[label][2]+=10.0;
+                if(f_rotate<0)vf_RotateCheck[label][2]-=10.0;
+                vf_RotateCheck[label][0]=velocity[0];
+                vf_RotateCheck[label][1]=velocity[1];
+            }
+            ofPushStyle();
+            ofSetColor(0, 255, 255);
+            ofDrawLine(0, 0, velocity[0],  velocity[1]);
+            ofPopStyle();
+        }        
+        ofPushStyle();
+        ofSetColor(int(ofClamp(vf_RotateCheck[label][2],0,255)),0,int(ofClamp(-vf_RotateCheck[label][2],0,255)));
+        ofFill();
+        ofDrawCircle(0, 0, 20);
+        ofPopStyle();
+        
+        string msg ;
+        msg = ofToString(label);
+        msg += ":";
+        msg += ofToString(tracker.getAge(label));
+        msg += "¥n";
+        msg += ofToString(vf_RotateCheck[label][2]);
+        bool b_Send = false;
+        if(b_RotateDetectOn){
+            if(vf_RotateCheck[label][2]>pbRotateSumThr){
+                b_Send = true;
+            }
+            if(vf_RotateCheck[label][2]<-pbRotateSumThr){
+                b_Send = true;
+            }
+        }
+        if(b_OscActive and tracker.getAge(label)==1){
+            b_Send=true;
+        }
+        if(b_Send){
+            ofxOscMessage m;
+            m.setAddress("/mouse/position");
+            char x_;
+            char y_;
+            x_ = (char)(int)(255*center.x/ofGetWidth());
+            y_ = (char)(int)(255*center.y/ofGetHeight());
+            m.addCharArg(x_);
+            m.addCharArg(y_);
+            //m.addCharArg((char)score);
+            m.addCharArg((char) int(ofClamp((vf_RotateCheck[label][2]+255)/2,0,255)));
+            sender.sendMessage(m);
+            senderToL.sendMessage(m);
+            senderToR.sendMessage(m);
+        }
+        ofScale(5, 5);
+        ofSetColor(0, 255, 0);
+        ofDrawBitmapString(msg, 0, 0);
+        
+        ofPopMatrix();
+    }
+    if(!bHideGui){
+        gui.draw();
+    }
+    /*
     if(!bHideGui){
         ofPixels colorPixels;
         colorPixels.allocate(colorImg.width, colorImg.height, OF_PIXELS_RGB);
@@ -391,6 +476,16 @@ void ofDetection::draw() {
         }
         gui.draw();
     }
+     */
+    
+}
+
+void ofDetection::rotateDetectOn(bool _b){
+    b_RotateDetectOn = _b;
+}
+
+void ofDetection::sendOSC(bool _b){
+    b_OscActive = _b;
 }
 
 void ofDetection::keyPressed(int key) {
