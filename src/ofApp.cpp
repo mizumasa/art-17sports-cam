@@ -13,8 +13,14 @@ void ofApp::setup() {
     detectHeight = CAPTURE_H;
     detect.initAllocate(detectWidth,detectHeight);
 #ifdef _USE_LIVE_VIDEO
+    
+#ifdef _USE_BLACKMAGIC
+    cam.setup(BLACKMAGIC_W, BLACKMAGIC_H, BLACKMAGIC_FPS);
+#else
     vidGrabber.setDeviceID(0);
     vidGrabber.initGrabber(WEB_CAM_W,WEB_CAM_H);
+#endif
+    
 #else
     movie.loadMovie("MAH00013.MP4");
     movie.setVolume(0.0);
@@ -33,6 +39,30 @@ void ofApp::setup() {
 void ofApp::update() {
     
 #ifdef _USE_LIVE_VIDEO
+
+#ifdef _USE_BLACKMAGIC
+
+    if(cam.update()){
+        timer.tick();
+        //b_CamStart=true;
+        camPixels=cam.getColorPixels();
+        camPixels.resize(CAPTURE_W, CAPTURE_H);
+        camPixels.setImageType(OF_IMAGE_COLOR);
+        perspective.setPixels(camPixels);
+        perspective.update();
+        colorImg.setFromPixels(camPixels);
+        grayImage = colorImg;
+        if(b_DrawImage){
+            //detect.setPixels(grayImage.getPixels());
+            detect.setColorPixels(colorImg.getPixels());
+        }else{
+            detect.setColorPixels(perspective.getPixels());
+        }
+        //camImg.setFromPixels(camPixels.getData(), BLACKMAGIC_W, BLACKMAGIC_H, OF_IMAGE_COLOR_ALPHA);
+    }
+
+#else
+    
     vidGrabber.update();
 
     if (vidGrabber.isFrameNew()){
@@ -48,6 +78,9 @@ void ofApp::update() {
             detect.setColorPixels(perspective.getPixels());
         }
     }
+    
+#endif
+    
 #else
     movie.update();
     if(movie.isFrameNew()) {

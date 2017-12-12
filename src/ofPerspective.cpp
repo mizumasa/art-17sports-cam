@@ -50,6 +50,7 @@ void ofPerspective::setup() {
 
 void ofPerspective::setPixels(ofPixels _pixels){
     srcImg.setFromPixels(_pixels);
+    //srcImg.setFromPixels(_pixels.getData(), 1280, 720, OF_IMAGE_COLOR_ALPHA);
 }
 
 ofPixels ofPerspective::getPixels(){

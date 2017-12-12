@@ -15,15 +15,15 @@ void ofDetection::setup() {
     gui.add(pbMax.set("grad bottom Max", 255,0,500));
 
     gui.add(radMin.set("radMin", 1,1,10));
-    gui.add(radMax.set("radMax", 11,11,200));
+    gui.add(radMax.set("radMax", 50,11,200));
     gui.add(th.set("contourFinder detection Thr", 200,0,255));             //cv側の検出のthreshold(2値化しないとき)
-    gui.add(_th.set("Thr for binarization", 230,0,255));         //2値化のためのthreshold
+    gui.add(_th.set("Thr for binarization", 200,0,255));         //2値化のためのthreshold
     gui.add(hDetectThrS.set("H detect thr S", 128,0,255));
     gui.add(hDetectThrV.set("H detect thr V", 128,0,255));
-    gui.add(pbMixBalanceGBDiff.set("MixBalanceGBDiff", 1.0, 0.001, 3.0));
-    gui.add(pbMixBalanceGBSum.set("MixBalanceGBSum", 1.0, 0.001, 3.0));
+    gui.add(pbMixBalanceGBDiff.set("MixBalanceGBDiff", 3.0, 0.001, 3.0));
+    gui.add(pbMixBalanceGBSum.set("MixBalanceGBSum", 0.5, 0.001, 3.0));
     gui.add(pbMixGBThr.set("MixGBThr", 200,0,255));
-    gui.add(pbRotateSpeedThr.set("RotateSpeedThr", 1.0, 0.0, 10.0));
+    gui.add(pbRotateSpeedThr.set("RotateSpeedThr", 6.0, 0.0, 30.0));
     gui.add(pbRotateSumThr.set("RotateSumThr", 200,0,255));
     
     
@@ -268,6 +268,7 @@ void ofDetection::draw() {
                 if(f_rotate<0)vf_RotateCheck[label][2]-=10.0;
                 vf_RotateCheck[label][0]=velocity[0];
                 vf_RotateCheck[label][1]=velocity[1];
+                vf_RotateCheck[label][2] = ofClamp(vf_RotateCheck[label][2],-255,255);
             }
             ofPushStyle();
             ofSetColor(0, 255, 255);
@@ -303,8 +304,8 @@ void ofDetection::draw() {
             m.setAddress("/mouse/position");
             char x_;
             char y_;
-            x_ = (char)(int)(255*center.x/ofGetWidth());
-            y_ = (char)(int)(255*center.y/ofGetHeight());
+            x_ = (char)(int)(255*center.x/grayImageThr.getWidth());
+            y_ = (char)(int)(255*center.y/grayImageThr.getHeight());
             m.addCharArg(x_);
             m.addCharArg(y_);
             //m.addCharArg((char)score);
